@@ -1,0 +1,10 @@
+[Unit]
+Description=MBS 
+
+[Service]
+ExecStart=/opt/mqtt_bash_service/mqtt_bash_service.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

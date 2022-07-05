@@ -8,6 +8,17 @@ if [ $? -ne 0 ];then
     exit
 fi
 
+which mosquitto_sub > /dev/null
+if [ $? -ne 0 ];then
+    source /etc/*-release
+    case $ID_LIKE in
+	"debian") apt install -y mosquitto-clients;;	
+    esac
+fi
+which mosquitto_sub > /dev/null
+if [ $? -ne 0 ];then
+    (>&2 echo "ERROR: command mosquitto_sub not found ( please install mosquitto-clients package)")
+fi
 test -f /etc/systemd/system/mqtt_bash_service.service
 if [ $? -ne 0 ];then
     cat <<EOF > /etc/systemd/system/mqtt_bash_service.service

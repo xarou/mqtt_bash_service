@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+#!/bin/bash
+
 ## params are checked in this order : Env, Config, command line argument
 
 ## init default variables
@@ -84,12 +87,15 @@ test -z "$password" || params="$params -P $password"
 test -z "$ca" || params="$params --cafile $ca"
 test -z "$cert" || params="$params --cert $cert"
 test -z "$key" || params="$params --key $key"
-mosquitto_sub -h $broker -t $topic -p $broker_port -q $qos $params | while read line;do
 
-    if [ ! -z $action ];then
-	log_line "$action $line"	    
-	$action "$line"
-    else
-	log_line "NO ACTION $line"
-    fi
+pipe=$(mktemp)
+
+
+tail -f $pipe | mosquitto_pub -h $broker -t $topic -p $broker_port -q $qos $params -l  &
+child_pid=$!
+trap "echo 'cleaning file $pipe and killing $child_pid';rm $pipe;kill $child_pid " EXIT
+
+echo "Child pid is $child_pid"
+while read line ; do
+    echo "$line" >> $pipe
 done
